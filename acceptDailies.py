@@ -24,16 +24,20 @@ def needLogin(button):
         button.click()
         browser.find_element_by_name("username").send_keys(login[0])
         browser.find_element_by_name("password").send_keys(login[1])
+        mainFrame = browser.current_window_handle
         try:
+            browser.switch_to.frame(browser.find_elements_by_tag_name("iframe")[1])
             wait = WebDriverWait(browser, 5)
-            wait.until(expected_conditions.element_to_be_clickable(
-                (By.ID,"recaptcha-anchor")))
-            browser.find_element_by_id("recaptcha-anchor").click()
-            signIn = "btn full-width modal__button--hero modal__button--login"
-            browser.find_element_by_class_name(signIn).click()
+            checkBox = wait.until(expected_conditions.presence_of_element_located(
+                (By.XPATH,'//*[@id="rc-anchor-container"]')))
         except exceptions.TimeoutException:
             browser.close()
-            sys.exit("No Sign In/Recaptcha Button occurred? Closing...")
+            sys.exit("No Recaptcha Button occurred? Closing...")
+        else:
+            checkBox.click()
+        # TODO: Solve Recaptcha?
+        browser.switch_to.frame(mainFrame)
+        browser.find_element_by_class_name("btn full-width modal__button--hero modal__button--login").click()
 
 def collectDaily():
     pass
