@@ -1,11 +1,10 @@
 from selenium import webdriver
 from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
-from selenium.webdriver.common.keys import Keys
 from selenium.common import exceptions
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-import time
+from selenium.webdriver.common.keys import Keys
 import sys
 
 
@@ -26,25 +25,37 @@ def needLogin(button):
         browser.find_element_by_name("password").send_keys(login[1])
         mainFrame = browser.current_window_handle
         try:
-            browser.switch_to.frame(browser.find_elements_by_tag_name("iframe")[1])
+            captchaFrame = browser.find_elements_by_tag_name("iframe")[1]
+            browser.switch_to.frame(captchaFrame)
             wait = WebDriverWait(browser, 5)
-            checkBox = wait.until(expected_conditions.presence_of_element_located(
-                (By.XPATH,'//*[@id="rc-anchor-container"]')))
+            checkBox = wait.until(EC.presence_of_element_located(
+                (By.XPATH, '//*[@id="rc-anchor-container"]')))
         except exceptions.TimeoutException:
             browser.close()
             sys.exit("No Recaptcha Button occurred? Closing...")
         else:
             checkBox.click()
-        # TODO: Solve Recaptcha?
-        browser.switch_to.frame(mainFrame)
-        browser.find_element_by_class_name("btn full-width modal__button--hero modal__button--login").click()
+            input("Please confirm Recaptcha is completed, click submit, "
+                  + "then press return to continue.")
 
-def collectDaily():
+
+def collectDaily():  # TODO: Deal with treasure openings
+    """Check if the reward coin has been clicked and, if not, click it"""
+    coin = browser.find_element_by_id("reward-coin")
+    if coin.getAttribute("class") == "coin_dead":  # can't access dead objects
+        print("Coins already collected for the day.")
+    else:
+        coin.click()
+
+
+def checkStore():
+    """Determine if new games are in the store"""
     pass
 
 
 if __name__ == "__main__":
-    ffLoc = FirefoxBinary(r'C:\\Program Files (x86)\\Mozilla Firefox\\firefox.exe')
+    ffPath = r'C:\\Program Files (x86)\\Mozilla Firefox\\firefox.exe'
+    ffLoc = FirefoxBinary(ffPath)
     browser = webdriver.Firefox(firefox_binary=ffLoc)
     goToChrono()
     loginNav = browser.find_element_by_class_name("accountNav")
