@@ -37,15 +37,19 @@ def needLogin(button):
             checkBox.click()
             input("Please confirm Recaptcha is completed, click submit, "
                   + "then press return to continue.")
+            browser.switch_to.default_content()
 
 
 def collectDaily():  # TODO: Deal with treasure openings
     """Check if the reward coin has been clicked and, if not, click it"""
-    coin = browser.find_element_by_id("reward-coin")
-    if coin.getAttribute("class") == "coin_dead":  # can't access dead objects
+    wait = WebDriverWait(browser, 5)
+    coin = wait.until(EC.presence_of_element_located(
+        (By.CLASS_NAME, "coin")))
+    if coin.get_attribute("class") == "coin dead":
         print("Coins already collected for the day.")
     else:
-        coin.click()
+        coin.click()  
+        
 
 
 def checkStore():
