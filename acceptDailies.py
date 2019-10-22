@@ -54,8 +54,21 @@ def collectDaily():  # TODO: Deal with treasure openings
 
 def checkStore():
     """Determine if new games are in the store"""
-    pass
+    pastList = parsePastText()
+    currentGames = browser.find_element_by_class_name("chrono-shop__games")
 
+def parsePastText():
+    """Read the pastShop file"""
+    try:
+        with open("pastShop.txt") as past:
+            lines = past.readlines()
+            date = lines.pop(0)
+            for game in lines:  # Save the list of game titles to a list
+                pass
+    except OSError:
+        print("No 'pastShop.txt' file.\nPlease run "
+              + "'python acceptDalies.py -c' to create a new file")
+        sys.exit()
 
 if __name__ == "__main__":
     ffPath = r'C:\\Program Files (x86)\\Mozilla Firefox\\firefox.exe'
