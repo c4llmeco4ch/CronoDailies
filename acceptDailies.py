@@ -6,6 +6,12 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 import sys
+import datetime
+
+
+import typing
+# WE = typing.NewType("")
+# TODO: Add typing hints for functions
 
 
 def goToChrono():
@@ -49,7 +55,6 @@ def collectDaily():  # TODO: Deal with treasure openings
         print("Coins already collected for the day.")
     else:
         coin.click()  
-        
 
 
 def checkStore():
@@ -57,18 +62,45 @@ def checkStore():
     pastList = parsePastText()
     currentGames = browser.find_element_by_class_name("chrono-shop__games")
 
+
 def parsePastText():
     """Read the pastShop file"""
+    oldGames = []
     try:
         with open("pastShop.txt") as past:
             lines = past.readlines()
-            date = lines.pop(0)
+            date = lines.pop(0)  # Needed less for the program and more for the user
             for game in lines:  # Save the list of game titles to a list
-                pass
+                oldGames.append(game.split(":"))
     except OSError:
         print("No 'pastShop.txt' file.\nPlease run "
               + "'python acceptDalies.py -c' to create a new file")
         sys.exit()
+    else:
+        return oldGames
+
+
+def createGameFile(gameDiv, overwrite):
+    gameList = []
+    try:
+        with open("pastShop.txt", ("w" if overwrite else "x")) as file:
+            for game in gameDiv.find_elements_by_tag_name("li"):
+                name = game.find_element_by_class_name("game-name").text
+                claimed = game.find_element_by_class_name("claimed-value").text
+                claimed = claimed[:claimed.index("%")]
+                gameList.append("{name}:{perc}".format(name=name,perc=claimed))
+            file.write(datetime.datetime)
+            for val in gameList:
+                file.write(val + '\n')
+    except OSError:
+        print("Tried to overwrite a file that does not exist...exiting")
+        sys.exit()
+
+
+def breakDown():
+    browser.close()
+    del(browser)
+
 
 if __name__ == "__main__":
     ffPath = r'C:\\Program Files (x86)\\Mozilla Firefox\\firefox.exe'
@@ -84,3 +116,4 @@ if __name__ == "__main__":
         needLogin(loginButton)
     finally:
         collectDaily()
+    breakDown()
