@@ -97,9 +97,9 @@ def createGameFile(gameDiv, overwrite):
         sys.exit()
 
 
-def breakDown():
-    browser.close()
-    del(browser)
+def breakDown(driver):
+    driver.close()
+    del(driver)
 
 
 if __name__ == "__main__":
@@ -116,4 +116,4 @@ if __name__ == "__main__":
         needLogin(loginButton)
     finally:
         collectDaily()
-    breakDown()
+    breakDown(browser)
