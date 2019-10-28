@@ -7,6 +7,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 import sys
 import datetime
+import pathlib
 
 
 import typing
@@ -14,14 +15,26 @@ import typing
 # TODO: Add typing hints for functions
 
 
-def goToChrono():
+def goToChrono() -> None:
     """Direct the browser to chrono.gg"""
     browser.get("https://www.chrono.gg/")
     assert "Chrono.gg" in browser.title
 
 
-def needLogin(button):
+def needLogin(button) -> None:
     """Login to chrono.gg using info from a text file"""
+    path = pathlib.Path("credentials.txt")
+    if not path.exists():
+        response = input("You do not have a credentials file. Would you like to create one?")
+        if "y" in response:
+            with open("credentials.txt", "x") as login:
+                text = input("Username: ")
+                text += ":"
+                text += input("Password: ")
+                login.write(text)
+        else:
+            input("No credentials created. Please log in and press enter to continue")
+            return
     with open("credentials.txt") as info:
         text = info.read()
         assert ":" in text
@@ -46,7 +59,7 @@ def needLogin(button):
             browser.switch_to.default_content()
 
 
-def collectDaily():  # TODO: Deal with treasure openings
+def collectDaily() -> None:  # TODO: Deal with treasure openings
     """Check if the reward coin has been clicked and, if not, click it"""
     wait = WebDriverWait(browser, 5)
     coin = wait.until(EC.presence_of_element_located(
@@ -63,7 +76,7 @@ def checkStore():
     currentGames = browser.find_element_by_class_name("chrono-shop__games")
 
 
-def parsePastText():
+def parsePastText():  # TODO: Return list of strings
     """Read the pastShop file"""
     oldGames = []
     try:
@@ -80,7 +93,7 @@ def parsePastText():
         return oldGames
 
 
-def createGameFile(gameDiv, overwrite):
+def createGameFile(gameDiv, overwrite) -> None:
     gameList = []
     try:
         with open("pastShop.txt", ("w" if overwrite else "x")) as file:
@@ -97,15 +110,26 @@ def createGameFile(gameDiv, overwrite):
         sys.exit()
 
 
-def breakDown(driver):
+def breakDown(driver) -> None:
     driver.close()
     del(driver)
 
 
+def determineBasePath() -> str:
+    if sys.platform == "linux" or platform == "linux2":
+        return r'/usr/lib/firefox/firefox'
+    elif "win" in sys.platform.lower():
+        return r'C:\\Program Files (x86)\\Mozilla Firefox\\firefox.exe'
+    elif sys.platform == "darwin":
+        return r'/Applications/Firefox.app'
+
 if __name__ == "__main__":
-    ffPath = r'C:\\Program Files (x86)\\Mozilla Firefox\\firefox.exe'
+    ffPath = determineBasePath()
     ffLoc = FirefoxBinary(ffPath)
-    browser = webdriver.Firefox(firefox_binary=ffLoc)
+    options = webdriver.firefox.options.Options()
+    if "linux" in sys.platform:
+        options.headless = True
+    browser = webdriver.Firefox(options=options)
     goToChrono()
     loginNav = browser.find_element_by_class_name("accountNav")
     try:
