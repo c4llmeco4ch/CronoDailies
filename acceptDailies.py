@@ -67,7 +67,8 @@ def collectDaily() -> None:  # TODO: Deal with treasure openings
     if coin.get_attribute("class") == "coin dead":
         print("Coins already collected for the day.")
     else:
-        coin.click()  
+        coin.click()
+        print("Coins collected for the day")
 
 
 def checkStore():
@@ -116,7 +117,7 @@ def breakDown(driver) -> None:
 
 
 def determineBasePath() -> str:
-    if sys.platform == "linux" or platform == "linux2":
+    if sys.platform == "linux" or sys.platform == "linux2":
         return r'/usr/lib/firefox/firefox'
     elif "win" in sys.platform.lower():
         return r'C:\\Program Files (x86)\\Mozilla Firefox\\firefox.exe'
@@ -126,10 +127,7 @@ def determineBasePath() -> str:
 if __name__ == "__main__":
     ffPath = determineBasePath()
     ffLoc = FirefoxBinary(ffPath)
-    options = webdriver.firefox.options.Options()
-    if "linux" in sys.platform:
-        options.headless = True
-    browser = webdriver.Firefox(options=options)
+    browser = webdriver.Firefox(firefox_binary=ffLoc)
     goToChrono()
     loginNav = browser.find_element_by_class_name("accountNav")
     try:
