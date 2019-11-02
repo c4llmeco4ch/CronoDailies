@@ -4,13 +4,12 @@ from selenium.common import exceptions
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
 import sys
 import datetime
 import pathlib
 
 
-import typing
+# import typing
 # WE = typing.NewType("")
 # TODO: Add typing hints for functions
 
@@ -25,7 +24,8 @@ def needLogin(button) -> None:
     """Login to chrono.gg using info from a text file"""
     path = pathlib.Path("credentials.txt")
     if not path.exists():
-        response = input("You do not have a credentials file. Would you like to create one?")
+        response = input("You do not have a credentials file."
+                         + " Would you like to create one?")
         if "y" in response:
             with open("credentials.txt", "x") as login:
                 text = input("Username: ")
@@ -33,7 +33,8 @@ def needLogin(button) -> None:
                 text += input("Password: ")
                 login.write(text)
         else:
-            input("No credentials created. Please log in and press enter to continue")
+            input("No credentials created. "
+                  + "Please log in and press enter to continue")
             return
     with open("credentials.txt") as info:
         text = info.read()
@@ -42,7 +43,6 @@ def needLogin(button) -> None:
         button.click()
         browser.find_element_by_name("username").send_keys(login[0])
         browser.find_element_by_name("password").send_keys(login[1])
-        mainFrame = browser.current_window_handle
         try:
             captchaFrame = browser.find_elements_by_tag_name("iframe")[1]
             browser.switch_to.frame(captchaFrame)
@@ -83,7 +83,7 @@ def parsePastText():  # TODO: Return list of strings
     try:
         with open("pastShop.txt") as past:
             lines = past.readlines()
-            date = lines.pop(0)  # Needed less for the program and more for the user
+            date = lines.pop(0)  # More for the user than the program
             for game in lines:  # Save the list of game titles to a list
                 oldGames.append(game.split(":"))
     except OSError:
@@ -102,7 +102,7 @@ def createGameFile(gameDiv, overwrite) -> None:
                 name = game.find_element_by_class_name("game-name").text
                 claimed = game.find_element_by_class_name("claimed-value").text
                 claimed = claimed[:claimed.index("%")]
-                gameList.append("{name}:{perc}".format(name=name,perc=claimed))
+                gameList.append("{n}:{perc}".format(n=name, perc=claimed))
             file.write(datetime.datetime)
             for val in gameList:
                 file.write(val + '\n')
@@ -123,6 +123,7 @@ def determineBasePath() -> str:
         return r'C:\\Program Files (x86)\\Mozilla Firefox\\firefox.exe'
     elif sys.platform == "darwin":
         return r'/Applications/Firefox.app'
+
 
 if __name__ == "__main__":
     ffPath = determineBasePath()
