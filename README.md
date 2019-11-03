@@ -1,5 +1,5 @@
 # CronoDailies
-October 27, 2019
+November 2, 2019
 
 **Use**:
 
@@ -16,5 +16,7 @@ TODO:
 * Incorporate elements regarding the coin shop
 
 * Have alert for captcha solving handled more elegantly?
+
+* Update for console args
 
 Please feel free to provide any feedback in the issues tab on this repository.
