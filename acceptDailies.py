@@ -61,7 +61,7 @@ def needLogin(button) -> None:
 
 def collectDaily() -> None:  # TODO: Deal with treasure openings
     """Check if the reward coin has been clicked and, if not, click it"""
-    wait = WebDriverWait(browser, 5)
+    wait = WebDriverWait(browser, 7)
     coin = wait.until(EC.presence_of_element_located(
         (By.CLASS_NAME, "coin")))
     if coin.get_attribute("class") == "coin dead":
