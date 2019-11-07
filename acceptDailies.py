@@ -71,10 +71,15 @@ def collectDaily() -> None:  # TODO: Deal with treasure openings
         print("Coins collected for the day")
 
 
-def checkStore():
+def checkStore() -> bool:
     """Determine if new games are in the store"""
     pastList = parsePastText()
     currentGames = browser.find_element_by_class_name("chrono-shop__games")
+    for game in currentGames:
+        name = game.find_element_by_class_name("game-name")
+        if name not in pastList:
+            return True
+    return False
 
 
 def parsePastText():  # TODO: Return list of strings
