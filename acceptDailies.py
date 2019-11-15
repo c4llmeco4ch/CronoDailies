@@ -74,10 +74,13 @@ def collectDaily() -> None:  # TODO: Deal with treasure openings
 def checkStore() -> bool:
     """Determine if new games are in the store"""
     pastList = parsePastText()
-    currentGames = browser.find_element_by_class_name('chrono-shop__games')
+    browser.get('https://www.chrono.gg/shop')
+    currentGames = browser.find_element_by_xpath('//*[@id="react"]/div/main/div[3]/div[2]/ul')
     for game in currentGames:
-        name = game.find_element_by_class_name('game-name')
+        name = game.find_element_by_xpath('//div[3]/span').text
         if name not in pastList:
+            print('%s was not in list of past games' % name)
+            createGameFile(currentGames, True)
             return True
     return False
 
@@ -90,12 +93,12 @@ def parsePastText():  # TODO: Return list of strings
             lines = past.readlines()
             date = lines.pop(0)  # More for the user than the program
             for game in lines:  # Save the list of game titles to a list
-                oldGames.append(game.split(":"))
+                oldGames.append(game.split("::"))
     except OSError:
         print('No \'pastShop.txt\' file.\nPlease run '
               + '\'python acceptDalies.py -c\' to create a new file')
         sys.exit()
-    else:
+    else:   
         return oldGames
 
 
@@ -103,16 +106,20 @@ def createGameFile(gameDiv, overwrite) -> None:
     gameList = []
     try:
         with open('pastShop.txt', ('w' if overwrite else 'x')) as file:
-            for game in gameDiv.find_elements_by_tag_name('li'):
-                name = game.find_element_by_class_name('game-name').text
-                claimed = game.find_element_by_class_name('claimed-value').text
+            availableGames = gameDiv.find_elements_by_xpath('li')
+            for game in availableGames:
+                name = game.find_element_by_xpath('div[3]/span').text
+                claimed = game.find_element_by_xpath('div[4]/span').text
                 claimed = claimed[:claimed.index("%")]
-                gameList.append("{n}:{perc}".format(n=name, perc=claimed))
-            file.write(datetime.date.today())
+                gameList.append("{n}::{perc}".format(n=name, perc=claimed))
+            file.write(str(datetime.date.today()) + '\n')
             for val in gameList:
                 file.write(val + '\n')
     except OSError:
-        print('Tried to overwrite a file that does not exist...exiting')
+        if overwrite:
+            print('Tried to overwrite a file that does not exist...exiting')
+        else:
+            print('Tried to create a file that already exists...exiting')
         sys.exit()
 
 
@@ -139,12 +146,21 @@ if __name__ == '__main__':
     for op, val in opts:
         if op == '-h' or op == '--help':
             pass
-        loginNav = browser.find_element_by_class_name('accountNav')
-        try:
-            loginButton = loginNav.find_element_by_link_text('Sign In')
-        except exceptions.NoSuchElementException:
-            print('You are already logged in.\nProceeding...')
-        else:
-            needLogin(loginButton)
-        collectDaily()
+        elif '-d' in op:
+            loginNav = browser.find_element_by_class_name('accountNav')
+            try:
+                loginButton = loginNav.find_element_by_link_text('Sign In')
+            except exceptions.NoSuchElementException:
+                print('You are already logged in.\nProceeding...')
+            else:
+                needLogin(loginButton)
+            collectDaily()
+        elif '-c' in op:
+            browser.get('https://www.chrono.gg/shop')
+            wait = WebDriverWait(browser, 5)
+            gameList = wait.until(EC.presence_of_element_located(
+                (By.XPATH, '//*[@id="react"]/div/main/div[3]/div[2]/ul')))
+            createGameFile(browser.find_element_by_xpath('//*[@id="react"]/div/main/div[3]/div[2]/ul'), False)
+        elif '-s' in op:
+            checkStore()
     breakDown(browser)
