@@ -1,10 +1,13 @@
+import sys
+import datetime
+import pathlib
+import getopt
 from selenium import webdriver
 from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 from selenium.common import exceptions
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-import sys, datetime, pathlib, getopt
 
 
 # import typing
@@ -13,6 +16,7 @@ import sys, datetime, pathlib, getopt
 
 OPTIONS = 'hdcs'
 LONG_OPTS = ['help', 'daily', 'create', 'store']
+
 
 def goToChrono() -> None:
     """Direct the browser to chrono.gg"""
@@ -75,7 +79,8 @@ def checkStore() -> bool:
     """Determine if new games are in the store"""
     pastList = parsePastText()
     browser.get('https://www.chrono.gg/shop')
-    currentGames = browser.find_element_by_xpath('//*[@id="react"]/div/main/div[3]/div[2]/ul')
+    currentGames = browser.find_element_by_xpath(
+                           '//*[@id="react"]/div/main/div[3]/div[2]/ul')
     for game in currentGames:
         name = game.find_element_by_xpath('//div[3]/span').text
         if name not in pastList:
@@ -91,14 +96,14 @@ def parsePastText():  # TODO: Return list of strings
     try:
         with open("pastShop.txt") as past:
             lines = past.readlines()
-            date = lines.pop(0)  # More for the user than the program
+            lines.pop(0)
             for game in lines:  # Save the list of game titles to a list
                 oldGames.append(game.split("::"))
     except OSError:
         print('No \'pastShop.txt\' file.\nPlease run '
               + '\'python acceptDalies.py -c\' to create a new file')
         sys.exit()
-    else:   
+    else:
         return oldGames
 
 
@@ -137,16 +142,27 @@ def determineBasePath() -> str:
         return r'/Applications/Firefox.app'
 
 
+def printHelp() -> None:
+    """The help message for this module"""
+    print(''.join(['Usage:\n',
+                   '-h or --help: Display this help message\n',
+                   '-d or --daily: Collect the daily reward\n',
+                   '-c or --create: Create a list of past games\n',
+                   '-s or --store: See if any new games',
+                   ' have been added to the store']))
+
+
 if __name__ == '__main__':
-    opts, args = getopt.getopt(sys.argv[1:], OPTIONS, LONG_OPTS)
+    opts, _ = getopt.getopt(sys.argv[1:], OPTIONS, LONG_OPTS)
+    if ('-h','') in opts or ('--help','') in opts:
+        printHelp()
+        sys.exit()
     ffPath = determineBasePath()
     ffLoc = FirefoxBinary(ffPath)
     browser = webdriver.Firefox(firefox_binary=ffLoc)
     goToChrono()
-    for op, val in opts:
-        if op == '-h' or op == '--help':
-            pass
-        elif '-d' in op:
+    for op, _ in opts:
+        if '-d' in op:
             loginNav = browser.find_element_by_class_name('accountNav')
             try:
                 loginButton = loginNav.find_element_by_link_text('Sign In')
@@ -160,7 +176,8 @@ if __name__ == '__main__':
             wait = WebDriverWait(browser, 5)
             gameList = wait.until(EC.presence_of_element_located(
                 (By.XPATH, '//*[@id="react"]/div/main/div[3]/div[2]/ul')))
-            createGameFile(browser.find_element_by_xpath('//*[@id="react"]/div/main/div[3]/div[2]/ul'), False)
+            createGameFile(browser.find_element_by_xpath(
+                          '//*[@id="react"]/div/main/div[3]/div[2]/ul'), False)
         elif '-s' in op:
             checkStore()
     breakDown(browser)
