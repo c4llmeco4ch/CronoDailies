@@ -137,7 +137,7 @@ def determineBasePath() -> str:
     if sys.platform == 'linux' or sys.platform == 'linux2':
         return r'/usr/lib/firefox/firefox'
     elif 'win' in sys.platform.lower():
-        return r'C:\\Program Files (x86)\\Mozilla Firefox\\firefox.exe'
+        return r'C:\\Program Files\\Mozilla Firefox\\firefox.exe'
     elif sys.platform == 'darwin':
         return r'/Applications/Firefox.app'
 
