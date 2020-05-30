@@ -84,7 +84,7 @@ def checkStore() -> bool:
     for game in currentGames:
         name = game.find_element_by_xpath('//div[3]/span').text
         if name not in pastList:
-            print('%s was not in list of past games' % name)
+            print(f'{name} was not in list of past games')
             createGameFile(currentGames, True)
             return True
     return False
@@ -116,10 +116,10 @@ def createGameFile(gameDiv, overwrite) -> None:
                 name = game.find_element_by_xpath('div[3]/span').text
                 claimed = game.find_element_by_xpath('div[4]/span').text
                 claimed = claimed[:claimed.index("%")]
-                gameList.append("{n}::{perc}".format(n=name, perc=claimed))
-            file.write(str(datetime.date.today()) + '\n')
+                gameList.append(f'{name}::{claimed}')
+            file.write(f'{datetime.date.today()}\n')
             for val in gameList:
-                file.write(val + '\n')
+                file.write(f'{val}\n')
     except OSError:
         if overwrite:
             print('Tried to overwrite a file that does not exist...exiting')
